@@ -28,29 +28,26 @@ echo "${GREEN}----------------------------${NC}" | tee -a "$LOG"
 date | tee -a "$LOG"
 echo "${GREEN}----------------------------${NC}" | tee -a "$LOG"
 
-# Cache sudo credentials upfront and keep them alive for the duration of the script
+# Cache sudo credentials upfront.
+# Note: background keepalive (sudo -n true in a loop) does NOT work on macOS
+# with tty_tickets enabled (the default) — the background subshell loses its
+# TTY association and refreshes a different timestamp. Instead we refresh
+# sudo inline before each step that may need it.
 echo "${PURPLE}Sudo authentication${NC}" | tee -a "$LOG"
 sudo -v || { echo "${RED}sudo authentication failed, exiting.${NC}" | tee -a "$LOG"; exit 1; }
-# Refresh sudo timestamp every 50 seconds in the background until the script exits
-( while true; do sudo -n true; sleep 50; done ) &
-SUDO_KEEPER_PID=$!
-trap "kill $SUDO_KEEPER_PID 2>/dev/null" EXIT
-
 
 # Brew
 echo "${PURPLE}Brew Update${NC}" | tee -a "$LOG"
-brew update 2>&1 | tee -a "$LOG" &&
+brew update 2>&1 | tee -a "$LOG"
 
 echo "${PURPLE}Brew Upgrade${NC}" | tee -a "$LOG"
 brew upgrade 2>&1 | tee -a "$LOG"
 
 # Brew Cask
 # Cask upgrades often need sudo (e.g. removing apps from /Applications).
-# Piping through tee can prevent brew's internal sudo from reading the
-# password prompt, so we:
-#   1. Refresh the sudo timestamp right before each cask command
-#   2. Use process substitution ( > >(...) ) instead of a pipe so that
-#      brew's stdin stays connected to the terminal
+# We refresh sudo before each cask command and use process substitution
+# ( > >(...) ) instead of a pipe so that brew's stdin stays connected to
+# the terminal — allowing brew's internal sudo to prompt if needed.
 echo "${PURPLE}Brew Upgrade Cask${NC}" | tee -a "$LOG"
 sudo -v
 brew upgrade --cask > >(tee -a "$LOG") 2>&1
