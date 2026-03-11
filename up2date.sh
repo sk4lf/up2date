@@ -36,6 +36,7 @@ sudo -v || { echo "${RED}sudo authentication failed, exiting.${NC}" | tee -a "$L
 SUDO_KEEPER_PID=$!
 trap "kill $SUDO_KEEPER_PID 2>/dev/null" EXIT
 
+
 # Brew
 echo "${PURPLE}Brew Update${NC}" | tee -a "$LOG"
 brew update 2>&1 | tee -a "$LOG" &&
@@ -44,11 +45,19 @@ echo "${PURPLE}Brew Upgrade${NC}" | tee -a "$LOG"
 brew upgrade 2>&1 | tee -a "$LOG"
 
 # Brew Cask
+# Cask upgrades often need sudo (e.g. removing apps from /Applications).
+# Piping through tee can prevent brew's internal sudo from reading the
+# password prompt, so we:
+#   1. Refresh the sudo timestamp right before each cask command
+#   2. Use process substitution ( > >(...) ) instead of a pipe so that
+#      brew's stdin stays connected to the terminal
 echo "${PURPLE}Brew Upgrade Cask${NC}" | tee -a "$LOG"
-brew upgrade --cask 2>&1 | tee -a "$LOG"
+sudo -v
+brew upgrade --cask > >(tee -a "$LOG") 2>&1
 
 echo "${PURPLE}Brew Upgrade Cask (greedy)${NC}" | tee -a "$LOG"
-brew upgrade --cask --greedy 2>&1 | tee -a "$LOG"
+sudo -v
+brew upgrade --cask --greedy > >(tee -a "$LOG") 2>&1
 
 # oh-my-zsh
 echo "${PURPLE}oh-my-zsh${NC}" | tee -a "$LOG"
