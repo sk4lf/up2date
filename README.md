@@ -148,7 +148,7 @@ The uninstaller removes only the `PATH` entry it added. A backup of your `.zshrc
 
 ## Usage
 
-The script will prompt for your `sudo` password once at startup. It keeps the credentials alive in the background for the duration of the run, so you won't be asked again even if the update process takes a long time.
+Homebrew cask upgrades may prompt for your `sudo` password when they need to modify `/Applications`. Homebrew intentionally resets the sudo timestamp on every invocation, so the password cannot be pre-cached — you may be prompted once per cask command that requires elevated privileges.
 
 ### Running on a schedule
 
@@ -174,9 +174,8 @@ Both stdout and stderr from each tool are captured, so failures are visible in t
 
 ## Security notes
 
-- `sudo -v` is used to cache credentials upfront — your password is never stored in a variable or written to disk.
-- A background keeper loop refreshes the sudo timestamp every 50 seconds so it doesn't expire mid-run.
-- The keeper process is automatically terminated when the script exits (including on error), via `trap`.
+- Your password is never stored in a variable or written to disk.
+- Homebrew intentionally resets the sudo timestamp (`sudo --reset-timestamp`) at the start of every `brew` command, so pre-caching credentials is not possible. The script lets brew handle sudo prompts natively.
 
 ## File structure
 
