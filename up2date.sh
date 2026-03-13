@@ -12,6 +12,9 @@ GREEN='\033[0;32m'
 PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
+# Force Homebrew to preserve colored output even when piped through tee
+export HOMEBREW_COLOR=1
+
 # Variables
 HOMEDIR="$HOME"
 ZSHDIR="$HOMEDIR/.oh-my-zsh"
