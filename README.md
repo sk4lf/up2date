@@ -116,6 +116,38 @@ The restore script will:
 - Restore `~/.p10k.zsh` (existing file is backed up to `~/.p10k.zsh.bak`)
 - Set zsh as the default shell if needed
 
+## Backup & restore dotfiles
+
+Dump your dotfiles and app configurations into a snapshot directory and restore them on a new machine.
+
+**Dump** the current dotfiles:
+
+```zsh
+./dump-dotfiles.sh                              # saves to dotfiles-snapshot/ in the script directory
+./dump-dotfiles.sh ~/backups/dotfiles           # or specify a custom path
+```
+
+The snapshot captures:
+- `~/.gitconfig`
+- `~/.ssh/config`
+- `~/.vimrc`
+- VS Code settings, keybindings, snippets, and extensions list
+- iTerm2 preferences (converted to portable XML format)
+
+**Restore** from a snapshot:
+
+```zsh
+./restore-dotfiles.sh                              # reads dotfiles-snapshot/ from the script directory
+./restore-dotfiles.sh ~/backups/dotfiles           # or specify the snapshot path
+```
+
+The restore script will:
+- Copy each dotfile to its expected location (existing files are backed up to `.bak`)
+- Set correct permissions on `~/.ssh/config`
+- Restore VS Code settings, keybindings, and snippets
+- Install all VS Code extensions from the saved list (skips already installed)
+- Import iTerm2 preferences via `defaults import`
+
 ## Installation
 
 Clone or download the repo, then run the installer from the project directory:
@@ -190,5 +222,7 @@ Both stdout and stderr from each tool are captured, so failures are visible in t
 ├── install-omz.sh   # Installs oh-my-zsh, plugins, and Powerlevel10k theme
 ├── dump-omz.sh      # Dumps current oh-my-zsh configuration to a snapshot file
 ├── restore-omz.sh   # Restores oh-my-zsh configuration from a snapshot file
+├── dump-dotfiles.sh # Dumps dotfiles and app configs to a snapshot directory
+├── restore-dotfiles.sh # Restores dotfiles and app configs from a snapshot
 └── README.md        # This file
 ```
