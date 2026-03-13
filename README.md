@@ -12,6 +12,28 @@ Runs the following update tasks sequentially:
 
 All output is logged to `~/log/up2date.sh.log` for later review.
 
+## Quick start: full Mac migration
+
+Dump everything on your current Mac, restore on a new one.
+
+**On the old Mac:**
+
+```zsh
+./dump-mac.sh                          # saves to mac-snapshot/ in the script directory
+./dump-mac.sh ~/backups/my-mac         # or specify a custom path
+```
+
+This captures Homebrew packages, oh-my-zsh config, dotfiles, and macOS system preferences in one go.
+
+**On the new Mac:**
+
+```zsh
+./setup-mac.sh                          # reads mac-snapshot/ from the script directory
+./setup-mac.sh ~/backups/my-mac         # or specify the snapshot path
+```
+
+The setup script walks you through each step interactively — Homebrew install + packages, oh-my-zsh install + config, dotfiles, macOS preferences, and up2date itself. Each step can be skipped.
+
 ## Requirements
 
 - macOS
@@ -222,7 +244,9 @@ Both stdout and stderr from each tool are captured, so failures are visible in t
 ├── install-omz.sh   # Installs oh-my-zsh, plugins, and Powerlevel10k theme
 ├── dump-omz.sh      # Dumps current oh-my-zsh configuration to a snapshot file
 ├── restore-omz.sh   # Restores oh-my-zsh configuration from a snapshot file
-├── dump-dotfiles.sh # Dumps dotfiles and app configs to a snapshot directory
+├── dump-dotfiles.sh    # Dumps dotfiles and app configs to a snapshot directory
 ├── restore-dotfiles.sh # Restores dotfiles and app configs from a snapshot
-└── README.md        # This file
+├── dump-mac.sh         # Dumps entire Mac environment (runs all dump scripts)
+├── setup-mac.sh        # Sets up a fresh Mac from a snapshot (runs all install/restore scripts)
+└── README.md           # This file
 ```
