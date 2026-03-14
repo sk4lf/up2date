@@ -55,6 +55,7 @@ while [[ $# -gt 0 ]]; do
       echo "  <formula>        Show dependency tree for a specific formula"
       echo "  --all            Show dependency tree for every installed formula"
       echo "  --reverse        Show reverse dependencies (what depends on what)"
+      echo "  --reverse <formula>  Show what depends on a specific formula"
       echo "  --size           Show installed size for each package"
       echo "  -h, --help       Show this help"
       exit 0
@@ -65,7 +66,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       TARGET="$1"
-      MODE="single"
+      if [[ "$MODE" != "reverse" ]]; then
+        MODE="single"
+      fi
       shift
       ;;
   esac
@@ -324,22 +327,41 @@ case "$MODE" in
     ;;
 
   reverse)
-    # Find packages that are dependencies (not leaves)
-    DEPS_ONLY=()
-    for formula in "${ALL_INSTALLED[@]}"; do
-      if ! (( ${LEAVES[(Ie)$formula]} )); then
-        DEPS_ONLY+=("$formula")
+    if [[ -n "$TARGET" ]]; then
+      # Reverse tree for a single formula
+      if ! (( ${ALL_INSTALLED[(Ie)$TARGET]} )); then
+        error "'$TARGET' is not installed."
+        exit 1
       fi
-    done
+      if [[ -z "${USES_MAP[$TARGET]}" ]]; then
+        info "Reverse dependency tree for ${BOLD}$TARGET${NC}"
+        echo ""
+        echo "${BOLD}${YELLOW}${TARGET}${NC}"
+        echo "  ${GREY}(nothing depends on this package)${NC}"
+      else
+        info "Reverse dependency tree for ${BOLD}$TARGET${NC}"
+        echo ""
+        SEEN=()
+        print_reverse_tree "$TARGET" "" "" 0
+      fi
+    else
+      # Reverse tree for all dependencies
+      DEPS_ONLY=()
+      for formula in "${ALL_INSTALLED[@]}"; do
+        if ! (( ${LEAVES[(Ie)$formula]} )); then
+          DEPS_ONLY+=("$formula")
+        fi
+      done
 
-    info "Reverse dependency tree — what depends on what (${#DEPS_ONLY[@]} dependencies)"
-    echo ""
-    for dep in "${DEPS_ONLY[@]}"; do
-      [[ -z "${USES_MAP[$dep]}" ]] && continue
-      SEEN=()
-      print_reverse_tree "$dep" "" "" 0
+      info "Reverse dependency tree — what depends on what (${#DEPS_ONLY[@]} dependencies)"
       echo ""
-    done
+      for dep in "${DEPS_ONLY[@]}"; do
+        [[ -z "${USES_MAP[$dep]}" ]] && continue
+        SEEN=()
+        print_reverse_tree "$dep" "" "" 0
+        echo ""
+      done
+    fi
     ;;
 esac
 
