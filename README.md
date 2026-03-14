@@ -84,6 +84,23 @@ The restore script will:
 - Install all formulae in a single `brew install` batch (skips already installed)
 - Install all casks in a single `brew install --cask` batch (skips already installed)
 
+### Homebrew dependency tree
+
+Visualise installed package dependencies as a coloured tree in the terminal:
+
+```zsh
+./brew-tree.sh              # top-level packages with their dependency trees
+./brew-tree.sh qemu         # tree for a single formula
+./brew-tree.sh --all        # tree for every installed formula
+./brew-tree.sh --reverse    # reverse tree (what depends on what)
+./brew-tree.sh --size       # include disk size for each package
+```
+
+Features:
+- Shared dependencies are annotated with how many packages use them
+- Already-expanded subtrees are collapsed with a `(↑ see above)` marker
+- Casks are listed separately at the bottom
+
 ## Installing oh-my-zsh
 
 If you don't have oh-my-zsh yet, run the bundled installer first:
@@ -241,6 +258,7 @@ Both stdout and stderr from each tool are captured, so failures are visible in t
 ├── install-brew.sh  # Installs Homebrew and Xcode Command Line Tools
 ├── dump-brew.sh     # Dumps installed taps, formulae, and casks to a snapshot file
 ├── restore-brew.sh  # Restores Homebrew packages from a snapshot file
+├── brew-tree.sh     # Displays Homebrew dependency tree in the terminal
 ├── install-omz.sh   # Installs oh-my-zsh, plugins, and Powerlevel10k theme
 ├── dump-omz.sh      # Dumps current oh-my-zsh configuration to a snapshot file
 ├── restore-omz.sh   # Restores oh-my-zsh configuration from a snapshot file
